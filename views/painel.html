@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Calculadora Financeira</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"
+        />
+        <style>
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #ffffff;
+                margin: 0;
+                padding: 0;
+                text-align: left;
+            }
+            .finance-container {
+                background: #ffffff;
+                padding: 20px;
+                border-radius: 4px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                width: 300px;
+                margin-left: 0; 
+            }
+            input[type="number"] {
+                width: 100%; 
+                padding: 10px;
+                margin: 5px 0; 
+                border: 1px solid #cccccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+            input[type="submit"] {
+                background-color: #007bff;
+                color: white;
+                cursor: pointer;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 4px;
+                margin-top: 10px;
+                width: 100%;
+            }
+            input[type="submit"]:hover {
+                background-color: #0056b3;
+            }
+            .chart-container {
+                position: absolute;
+                right: 0;
+                top: 50px;
+                width: 300px;
+                height: 300px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="finance-container">
+            <h2>Calculadora Financeira</h2>
+            <form id="financeForm" action="/calcular" method="post">
+                <input
+                    type="number"
+                    id="income"
+                    placeholder="Receita Anual"
+                    required
+                />
+                <input
+                    type="number"
+                    id="expenses"
+                    placeholder="Gastos Anuais"
+                    required
+                />
+                <input type="submit" value="Calcular" />
+            </form>
+        </div>
+        <div class="chart-container">
+            <canvas id="financeChart"></canvas>
+        </div>
+        <p
+            id="balanceReport"
+            style="position: absolute; right: 0; top: 360px"
+        ></p>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+        <script>
+            async function addExpense(name, value) {
+    try {
+        const response = await fetch('http://localhost:8080/financas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, value }),
+        });
+        if (response.ok) {
+            console.log('Gasto adicionado com sucesso!');
+            getData(); // Atualiza a lista de gastos
+        } else {
+            console.error('Erro ao adicionar gasto');
+        }
+    } catch (error) {
+        console.error('Erro na comunicação com o servidor:', error);
+    }
+}
+
+// Função para deletar um gasto existente
+async function deleteExpense(id) {
+    try {
+        const response = await fetch(`http://localhost:8080/financas/${id}`, {
+            method: 'DELETE',
+        });
+        if (response.ok) {
+            console.log('Gasto deletado com sucesso!');
+            getData(); // Atualiza a lista de gastos
+        } else {
+            console.error('Erro ao deletar gasto');
+        }
+    } catch (error) {
+        console.error('Erro na comunicação com o servidor:', error);
+    }
+}
+
+// Função para obter a lista atualizada de gastos
+async function getData() {
+    const balanceReportEl = document.getElementById('balanceReport');
+    balanceReportEl.textContent = "carregando...";
+    try {
+        const response = await fetch("http://localhost:8080/financas");
+        const result = await response.json();
+        renderExpenses(result); // Renderiza a lista de gastos com os dados atualizados
+        balanceReportEl.textContent = "carregado!";
+    } catch (error) {
+        console.error('Erro ao obter dados:', error);
+        balanceReportEl.textContent = "Houve um erro ao pegar os dados.";
+    }
+}
+
+// Função para renderizar a lista de gastos
+function renderExpenses() {
+    function renderExpenses() {
+  // Implementação da renderização da lista de gastos
+  // Adicionar um botão para mostrar o gráfico
+  const botaoMostrarGrafico = document.createElement("button");
+  botaoMostrarGrafico.textContent = "Mostrar Gráfico";
+  botaoMostrarGrafico.addEventListener("click", () => {
+    // Abrir um modal com o gráfico
+    const modalGrafico = document.getElementById("modal-grafico");
+    modalGrafico.style.display = "block";
+
+    // Gerar e renderizar o gráfico dentro do modal
+    const grafico = gerarGrafico(data);
+    document.getElementById("container-grafico").appendChild(grafico);
+  });
+
+  document.getElementById("lista-gastos").appendChild(botaoMostrarGrafico);
+}
+
+// Função para gerar o gráfico
+function gerarGrafico(data) {
+  // Criar um contexto canvas para o gráfico
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  // Definir os dados do gráfico
+  const labels = data.map(d => d.data);
+  const valores = data.map(d => d.valor);
+
+  // Criar o gráfico
+  const myChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Valores",
+        data: valores,
+        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.5)"
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+  // Retornar o canvas do gráfico
+  return canvas;
+}
+  // Retorne o elemento DOM do gráfico
+}
+
+
+        </script>
+    </body>
+</html>

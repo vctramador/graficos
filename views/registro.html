@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Página de Registro</title>
+        <style>
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #e7e7e7;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                text-align: center;
+            }
+            .register-container {
+                background: #ffffff;
+                padding: 20px;
+                border-radius: 4px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            input[type="email"],
+            input[type="password"],
+            input[type="submit"],
+            input[type="text"] {
+                width: calc(100% - 16px);
+                padding: 8px;
+                margin: 8px 0;
+                border: 1px solid #cccccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+            input[type="submit"] {
+                background-color: #007bff;
+                color: white;
+                cursor: pointer;
+                border: none;
+                border-radius: 4px;
+            }
+            input[type="submit"]:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="register-container">
+            <h2>Registro</h2>
+            <form id="registerForm" action="/registro" method="POST">
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Digite seu nome"
+                    required
+                />
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Digite seu email"
+                    required
+                />
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Crie uma senha"
+                    required
+                />
+                <input type="submit" value="Registrar" />
+            </form>
+        </div>
+        <script>
+           const redirectUrl = "painel.html";
+const form = document.getElementById("registerForm");
+const errorMessage = document.getElementById("error-message");
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault(); 
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  // Simula se o email está disponivel
+  const isEmailAvailable = await checkEmailAvailability(email);
+
+  if (isEmailAvailable) {
+    try {
+      // enviando dados ao backend
+      const response = await fetch('db.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (response.ok) {
+        console.log("Registration successful! Name:", name, "Email:", email);
+        window.location.href = redirectUrl;
+      } else {
+        throw new Error('Falha ao registrar');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar dados:', error);
+      errorMessage.textContent = "Erro ao registrar. Tente novamente.";
+    }
+  } else {
+    errorMessage.textContent = "Email já cadastrado. Tente outro email.";
+  }
+});
+
+async function checkEmailAvailability(email) {
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  
+  return true; 
+}
+        </script>
+    </body>
+</html>
